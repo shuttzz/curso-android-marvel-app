@@ -32,6 +32,9 @@ android {
 
 dependencies {
 
+    // Fazendo o módulo app entender que existe o módulo core
+    implementation project(':core')
+
     // AndroidX
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.5.1'
