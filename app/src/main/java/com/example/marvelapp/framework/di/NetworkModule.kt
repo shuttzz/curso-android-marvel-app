@@ -1,5 +1,6 @@
 package com.example.marvelapp.framework.di
 
+import br.com.badbit.core.data.network.interceptor.AuthorizationInterceptor
 import com.example.marvelapp.BuildConfig
 import dagger.Module
 import dagger.Provides
@@ -9,6 +10,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 @Module
@@ -29,9 +31,23 @@ object NetworkModule {
     }
 
     @Provides
-    fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+    fun provideAuthorizationInterceptor(): AuthorizationInterceptor {
+        return AuthorizationInterceptor(
+            publicKey = BuildConfig.PUBLIC_KEY,
+            privateKey = BuildConfig.PRIVATE_KEY,
+            calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        )
+    }
+
+    @Provides
+    fun provideOkHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor,
+        authorizationInterceptor: AuthorizationInterceptor
+    ): OkHttpClient {
         return OkHttpClient.Builder().addInterceptor(loggingInterceptor)
-            .readTimeout(timeout = 15, TimeUnit.SECONDS).connectTimeout(timeout = 15, TimeUnit.SECONDS).build()
+            .addInterceptor(authorizationInterceptor)
+            .readTimeout(timeout = 15, TimeUnit.SECONDS)
+            .connectTimeout(timeout = 15, TimeUnit.SECONDS).build()
     }
 
     @Provides
